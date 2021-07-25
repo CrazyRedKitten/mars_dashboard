@@ -26,6 +26,9 @@ const App = (state) => {
         <main>
             ${Greeting(store.user.name)}
             <section>
+            ${rovers}
+            </section>
+            <section>
                 <h3>Put things on the page!</h3>
                 <p>Here is an example section.</p>
                 <p>
