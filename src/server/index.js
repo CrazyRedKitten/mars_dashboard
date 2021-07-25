@@ -1,14 +1,15 @@
 require('dotenv').config()
 const express = require('express')
-const bodyParser = require('body-parser')
+// removed bodyParser hence it is deprecated sinse express v. 4.16.0
+// const bodyParser = require('body-parser')
 const fetch = require('node-fetch')
 const path = require('path')
 
 const app = express()
 const port = 3000
 
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json())
 
 app.use('/', express.static(path.join(__dirname, '../public')))
 

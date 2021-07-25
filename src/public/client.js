@@ -97,7 +97,7 @@ const ImageOfTheDay = (apod) => {
 const getImageOfTheDay = (state) => {
     let { apod } = state
 
-    fetch(`https://r950324c957034xreactr0lcusuk-3000.udacity-student-workspaces.com/apod`)
+    fetch(`/apod`)
         .then(res => res.json())
         .then(apod => updateStore(store, { apod }))
 
