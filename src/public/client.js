@@ -2,6 +2,8 @@ let store = {
     user: { name: "Student" },
     apod: '',
     rovers: ['Curiosity', 'Opportunity', 'Spirit'],
+    roverData: {},
+    activeRover: "",
 }
 
 // add our markup to the page
@@ -19,27 +21,26 @@ const render = async (root, state) => {
 
 // create content
 const App = (state) => {
-    let { rovers, apod } = state
+    let { rovers, apod, roverData } = state
 
     return `
+        <nav class="navbar navbar-light bg-light">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">Mars Dashboard</span>
+            </div>
+        </nav>
         <header></header>
         <main>
-            ${Greeting(store.user.name)}
+            <div class="d-flex justify-content-center">
+                <div id="rover-group" class="btn-group" role="group" aria-label="Basic example">
+                    ${ rovers && renderRovers(rovers)}
+                </div>
+            </div>
             <section>
-            ${rovers}
+                ${ImageOfTheDay(apod)}
             </section>
             <section>
-                <h3>Put things on the page!</h3>
-                <p>Here is an example section.</p>
-                <p>
-                    One of the most popular websites at NASA is the Astronomy Picture of the Day. In fact, this website is one of
-                    the most popular websites across all federal agencies. It has the popular appeal of a Justin Bieber video.
-                    This endpoint structures the APOD imagery and associated metadata so that it can be repurposed for other
-                    applications. In addition, if the concept_tags parameter is set to True, then keywords derived from the image
-                    explanation are returned. These keywords could be used as auto-generated hashtags for twitter or instagram feeds;
-                    but generally help with discoverability of relevant imagery.
-                </p>
-                ${ImageOfTheDay(apod)}
+                ${RoverInfo(roverData)}
             </section>
         </main>
         <footer></footer>
@@ -66,6 +67,19 @@ const Greeting = (name) => {
     `
 }
 
+/**
+ * 
+ * @param {array} rovers - an array of available rovers
+ * @returns rovers
+ */
+const renderRovers = (rovers) => {
+    let htmlContent = '';
+    rovers.forEach(rover => {htmlContent += `<button type="button" class="btn btn-primary">${rover}</button>`})
+    return htmlContent;
+}
+
+
+// TODO: Remove example of pure funxtion
 // Example of a pure function that renders infomation requested from the backend
 const ImageOfTheDay = (apod) => {
 
@@ -80,29 +94,48 @@ const ImageOfTheDay = (apod) => {
     }
 
     // check if the photo of the day is actually type video!
-    if (apod.media_type === "video") {
-        return (`
-            <p>See today's featured video <a href="${apod.url}">here</a></p>
-            <p>${apod.title}</p>
-            <p>${apod.explanation}</p>
-        `)
-    } else {
-        return (`
-            <img src="${apod.image.url}" height="350px" width="100%" />
-            <p>${apod.image.explanation}</p>
-        `)
+    if (apod) {
+        if (apod.media_type === "video") {
+            return (`
+                <p>See today's featured video <a href="${apod.url}">here</a></p>
+                <p>${apod.title}</p>
+                <p>${apod.explanation}</p>
+            `)
+        } else {
+            return (`
+                <img src="${apod.image.url}" height="350px" width="100%" />
+                <p>${apod.image.explanation}</p>
+            `)
+        }
     }
 }
 
+const RoverInfo = (roverData) => {
+    const isEmptyRoverData = Object.keys(roverData).length === 0;
+
+    // Handle empty object
+    if (isEmptyRoverData) {
+        getRoverData('curiosity');
+    } else {
+        console.log(roverData.latest_photos);
+        return(`<code>${roverData.latest_photos}</code>`);
+    }
+}
 // ------------------------------------------------------  API CALLS
 
 // Example API call
-const getImageOfTheDay = (state) => {
-    let { apod } = state
-
+// TODO: Remove example
+const getImageOfTheDay = () => {
     fetch(`/apod`)
         .then(res => res.json())
         .then(apod => updateStore(store, { apod }))
+}
 
-    return data
+const getRoverData = (roverName) => {
+    fetch(`/rover/${roverName}`)
+        .then(res => res.json())
+        .then(roverData => {
+            console.log(roverData);
+            updateStore(store, {roverData});
+        });
 }
