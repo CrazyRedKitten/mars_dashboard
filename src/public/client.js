@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable new-cap */
 /* eslint-disable valid-jsdoc */
-
 // TODO: Add Immutable.js
 const store = {
   app: {name: 'Mars Dashboard'},
@@ -39,9 +38,8 @@ const App = (state) => {
                     ${ rovers && renderRovers(rovers)}
                 </div>
             </div>
-            <section>
+            <section id='photos'>
                 ${RoverCard(activeRover)}
-                ${RoverAPIData(roverData)}
                 ${getRoverInformation(roverData)}
             </section>
         </main>
@@ -97,12 +95,15 @@ const setRover = (roverName) => {
 
   switch (roverName) {
     case 'Curiosity':
+      getRoverData('curiosity');
       updateStore(store, {activeRover: roverIndexes.Curiosity});
       break;
     case 'Opportunity':
+      getRoverData('opportunity');
       updateStore(store, {activeRover: roverIndexes.Opportunity});
       break;
     case 'Spirit':
+      getRoverData('spirit');
       updateStore(store, {activeRover: roverIndexes.Spirit});
       break;
     default:
@@ -120,27 +121,10 @@ const renderRovers = (rovers) => {
   rovers.forEach((rover) => {
     htmlContent += `<button type="button"
     onclick="setRover('${rover}')" 
+    id="${rover + 'Button'}"
     class="btn btn-primary">${rover}</button>`;
   });
   return htmlContent;
-};
-
-/**
- *
- * @param {object} roverData data in application store
- * @return {object} data from NASA's API
- */
-const RoverAPIData = (roverData) => {
-  const isEmptyRoverData = Object.keys(roverData).length === 0;
-
-  // Handle empty object
-  if (isEmptyRoverData) {
-    // TODO: Get data about all rovers
-    getRoverData('curiosity');
-  } else {
-    console.log(roverData['latest_photos'][0].rover);
-    return ('ROVER DATA', roverData);
-  }
 };
 
 /**
@@ -163,5 +147,29 @@ const getRoverData = (roverName) => {
       .then((res) => res.json())
       .then((roverData) => {
         updateStore(store, {roverData});
+        // TODO: Call render method
+        renderPhotos(roverData);
       });
+};
+
+
+const renderPhotos = (roverData) => {
+  console.log('Render Photos', roverData);
+
+  const photoSection = document.getElementById('photos');
+
+  // Clean DOM
+  while (photoSection.firstChild) {
+    photoSection.removeChild(photoSection.lastChild);
+  }
+
+  // Add photos to DOM
+  roverData.latest_photos.map((photo) => {
+    console.log(photo);
+    // TODO: use component
+    const image = document.createElement('img');
+    image.src = photo.img_src;
+    photoSection.appendChild(image);
+  });
+  return roverData;
 };
