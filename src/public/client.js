@@ -159,6 +159,7 @@ const renderPhotos = (roverData) => {
   const photoSection = document.getElementById('photos');
 
   // Clean DOM
+  // Use loading component instead
   while (photoSection.firstChild) {
     photoSection.removeChild(photoSection.lastChild);
   }
