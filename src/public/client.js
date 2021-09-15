@@ -5,7 +5,6 @@
 const store = {
   app: {name: 'Mars Dashboard'},
   user: {name: 'Student'},
-  apod: '',
   rovers: ['Curiosity', 'Opportunity', 'Spirit'],
   roverData: {},
   activeRover: undefined,
@@ -37,6 +36,7 @@ const App = (state) => {
                     ${ rovers && renderRovers(rovers)}
                 </div>
             </div>
+            <section id='roverInfo'></section>
             <section class='image-container' id='photos'>
             </section>
         </main>
@@ -116,7 +116,8 @@ const getRoverData = (roverName) => {
       .then((res) => res.json())
       .then((roverData) => {
         updateStore(store, {roverData});
-        // TODO: Call render method
+        // Call render method
+        renderTable(roverData);
         renderPhotos(roverData);
       });
 };
@@ -124,8 +125,6 @@ const getRoverData = (roverName) => {
 
 // TODO: Remove side effects
 const renderPhotos = (roverData) => {
-  console.log('Render Photos', roverData);
-
   const photoSection = document.getElementById('photos');
 
   // Clean DOM
@@ -139,9 +138,6 @@ const renderPhotos = (roverData) => {
   const photosNodeArray = [];
 
   roverData.latest_photos.map((photo) => {
-    console.log(photo);
-    // TODO: Add container and rows of 3 or 4 photos per row
-
     photosNodeArray.push(createImageCard(photo));
     photoSection.appendChild(createImageCard(photo));
   });
@@ -166,7 +162,7 @@ const createCardContent = (data) => {
   header.textContent = 'header';
   header.classList.add('card-title');
 
-  // TODO: add https://stackoverflow.com/questions/29546550/flexbox-4-items-per-row
+  // https://stackoverflow.com/questions/29546550/flexbox-4-items-per-row
   cardContent.appendChild(header);
 
   return cardContent;
@@ -179,4 +175,44 @@ const createImageNode = (data) => {
   image.alt = `Photo taken by rover_name rover`;
   image.classList.add('image-card');
   return image;
+};
+
+const createRoverDataTable = (data) => {
+  const {name, landing_date, launch_date, status,
+  } = data.latest_photos[0].rover;
+  return `
+    <table class="table">
+    <tbody>
+      <tr>
+        <th scope="row">Rover name</th>
+        <td>${name}</td>
+      </tr>
+      <tr>
+        <th scope="row">Status</th>
+        <td>${status}</td>
+      </tr>
+      <tr>
+        <th scope="row">Launch date</th>
+        <td>${launch_date}</td>
+      </tr>
+            <tr>
+        <th scope="row">Landing date</th>
+        <td>${landing_date}</td>
+      </tr>
+    </tbody>
+  </table>
+  `;
+};
+
+const renderTable = (data) => {
+  const section = document.getElementById('roverInfo');
+
+  while (section.firstChild) {
+    section.removeChild(section.lastChild);
+  };
+
+  const fragment = document
+      .createRange()
+      .createContextualFragment(createRoverDataTable(data));
+  section.appendChild(fragment);
 };
