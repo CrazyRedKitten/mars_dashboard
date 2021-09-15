@@ -1,10 +1,10 @@
 /* -------------------  MOBILE  --------------------- */
 
 body {
-  display: flex;
+  /* display: flex;
   flex-direction: column;
   font-family: Arial;
-  min-height: 100vh;
+  min-height: 100vh; */
 }
 
 header {
@@ -13,26 +13,48 @@ header {
 
 main {
   flex: 1;
-  padding: 20px;
 }
 
 footer {
   /* footer styles */
 }
 
+.image-card {
+  flex: 1 0 21%; 
+  flex-wrap: wrap;
+  width: 100%;
+  height: auto;
+  margin: 5px;
+}
+
+.image-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
 /* -------------------  TABLET  --------------------- */
 @media (min-width: 768px) {
   /* use mobile */
+  .image-card {
+     width: calc(100% * (1/2) - 10px - 1px);
+  }
 }
 
 /* -------------------  DESKTOP  -------------------- */
 
 @media (min-width: 1224px) {
   /* use mobile */
+    .image-card {
+     width: calc(100% * (1/3) - 10px - 1px);
+  }
 }
 
 /* -------------------  LARGE SCREENS  -------------- */
 
 @media (min-width: 1824px) {
   /* use mobile */
+    .image-card {
+     width: calc(100% * (1/4) - 10px - 1px);
+  }
 }

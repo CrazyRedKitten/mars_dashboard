@@ -26,11 +26,10 @@ const render = async (root, state) => {
 
 // create content
 const App = (state) => {
-  const {rovers, roverData, activeRover} = state;
+  const {rovers} = state;
 
   return `
         ${renderNavbar(state)}
-        ${renderRoverInfo(state)}
         <main>
             <div class="d-flex justify-content-center">
                 <div id="rover-group" class="btn-group" role="group" 
@@ -38,9 +37,7 @@ const App = (state) => {
                     ${ rovers && renderRovers(rovers)}
                 </div>
             </div>
-            <section id='photos'>
-                ${RoverCard(activeRover)}
-                ${getRoverInformation(roverData)}
+            <section class='image-container' id='photos'>
             </section>
         </main>
     `;
@@ -63,29 +60,12 @@ const renderNavbar = (state) => {
     `);
 };
 
-const renderRoverInfo = (state) => {
-  const {activeRover} = state;
-
-  if (typeof activeRover !== undefined) {
-    // await getRoverData()
-    return '';
-  }
-
-  return 0;
-};
-
 // listening for load event because page should load before any JS is called
 window.addEventListener('load', () => {
   render(root, store);
 });
 
-// ------------------------------------------------------  COMPONENTS
-
-const RoverCard = (roverIndex) => {
-  const {rovers} = store;
-  return `<h1>Rover Information: ${rovers[roverIndex]}</h1>`;
-};
-
+// eslint-disable-next-line no-unused-vars
 const setRover = (roverName) => {
   const roverIndexes = {
     Curiosity: 0,
@@ -111,6 +91,8 @@ const setRover = (roverName) => {
   }
 };
 
+// ------------------------------------------------------  COMPONENTS
+
 /**
  *
  * @param {array} rovers - an array of available rovers
@@ -127,19 +109,6 @@ const renderRovers = (rovers) => {
   return htmlContent;
 };
 
-/**
- * Returns rover data object
- * @param {object} data - latest_photos data from NASA API
- * @return {object} rover - information about rover
- */
-const getRoverInformation = (data) => {
-  const isRoverDataEmpty = Object.keys(data).length === 0;
-  // Handle empty object
-  if (!isRoverDataEmpty) {
-    return data['latest_photos'][0].rover;
-  };
-};
-
 // ------------------------------------------------------  API CALLS
 
 const getRoverData = (roverName) => {
@@ -153,6 +122,7 @@ const getRoverData = (roverName) => {
 };
 
 
+// TODO: Remove side effects
 const renderPhotos = (roverData) => {
   console.log('Render Photos', roverData);
 
@@ -165,12 +135,48 @@ const renderPhotos = (roverData) => {
   }
 
   // Add photos to DOM
+  // TODO: Add photos to array of DOM elements
+  const photosNodeArray = [];
+
   roverData.latest_photos.map((photo) => {
     console.log(photo);
-    // TODO: use component
-    const image = document.createElement('img');
-    image.src = photo.img_src;
-    photoSection.appendChild(image);
+    // TODO: Add container and rows of 3 or 4 photos per row
+
+    photosNodeArray.push(createImageCard(photo));
+    photoSection.appendChild(createImageCard(photo));
   });
-  return roverData;
+  return photosNodeArray;
+};
+
+const createImageCard = (data) => {
+  const card = document.createElement('div');
+  const cardClasslist = ['card', 'bg-dark', 'text-white', 'col', 'image-card'];
+  cardClasslist.forEach((element) => card.classList.add(element));
+  card.appendChild(createImageNode(data.img_src));
+  card.appendChild(createCardContent(data));
+
+  // return card;
+  return createImageNode(data.img_src);
+};
+
+const createCardContent = (data) => {
+  const cardContent = document.createElement('div');
+  cardContent.classList.add('card-img-overlay');
+  const header = document.createElement('h5');
+  header.textContent = 'header';
+  header.classList.add('card-title');
+
+  // TODO: add https://stackoverflow.com/questions/29546550/flexbox-4-items-per-row
+  cardContent.appendChild(header);
+
+  return cardContent;
+};
+
+const createImageNode = (data) => {
+  const image = document.createElement('img');
+  image.src = data;
+  // TODO: Photo taken by camera name of rover_name rover
+  image.alt = `Photo taken by rover_name rover`;
+  image.classList.add('image-card');
+  return image;
 };
