@@ -1,11 +1,10 @@
 /* eslint-disable camelcase */
 /* eslint-disable new-cap */
 /* eslint-disable valid-jsdoc */
-// TODO: Add Immutable.js
+
 const store = {
-  app: {name: 'Mars Dashboard'},
-  user: {name: 'Student'},
-  rovers: ['Curiosity', 'Opportunity', 'Spirit'],
+  app: Immutable.Map({name: 'Mars Dashboard'}),
+  rovers: Immutable.List(['Curiosity', 'Opportunity', 'Spirit']),
   roverData: {},
   activeRover: undefined,
 };
@@ -26,7 +25,6 @@ const render = async (root, state) => {
 // create content
 const App = (state) => {
   const {rovers} = state;
-
   return `
         ${renderNavbar(state)}
         <main>
@@ -50,11 +48,10 @@ const App = (state) => {
  */
 const renderNavbar = (state) => {
   const {app} = state;
-
   return (`
         <nav class="navbar navbar-light bg-light">
             <div class="container-fluid">
-                <span class="navbar-brand mb-0 h1">${app.name}</span>
+                <span class="navbar-brand mb-0 h1">${app.get('name')}</span>
             </div>
         </nav>
     `);
@@ -117,8 +114,10 @@ const getRoverData = (roverName) => {
       .then((roverData) => {
         updateStore(store, {roverData});
         // Call render method
-        renderTable(roverData);
+        renderTable(roverData)();
         renderPhotos(roverData);
+      }).catch((error) => {
+        console.error(error);
       });
 };
 
@@ -138,12 +137,14 @@ const renderPhotos = (roverData) => {
   const photosNodeArray = [];
 
   roverData.latest_photos.map((photo) => {
-    photosNodeArray.push(createImageCard(photo));
-    photoSection.appendChild(createImageCard(photo));
+    const photoNode = createImageCard(photo)(photo.img_src);
+    photosNodeArray.push(photoNode);
+    photoSection.appendChild(photoNode);
   });
   return photosNodeArray;
 };
 
+//  HOF
 const createImageCard = (data) => {
   const card = document.createElement('div');
   const cardClasslist = ['card', 'bg-dark', 'text-white', 'col', 'image-card'];
@@ -152,7 +153,7 @@ const createImageCard = (data) => {
   card.appendChild(createCardContent(data));
 
   // return card;
-  return createImageNode(data.img_src);
+  return createImageNode;
 };
 
 const createCardContent = (data) => {
@@ -180,7 +181,9 @@ const createImageNode = (data) => {
 const createRoverDataTable = (data) => {
   const {name, landing_date, launch_date, status,
   } = data.latest_photos[0].rover;
-  return `
+
+
+  const tableString = `
     <table class="table">
     <tbody>
       <tr>
@@ -202,8 +205,12 @@ const createRoverDataTable = (data) => {
     </tbody>
   </table>
   `;
+
+  return document.createRange()
+      .createContextualFragment(tableString);
 };
 
+// HOF
 const renderTable = (data) => {
   const section = document.getElementById('roverInfo');
 
@@ -211,8 +218,9 @@ const renderTable = (data) => {
     section.removeChild(section.lastChild);
   };
 
-  const fragment = document
-      .createRange()
-      .createContextualFragment(createRoverDataTable(data));
-  section.appendChild(fragment);
+  const render = () => {
+    section.appendChild(createRoverDataTable(data));
+  };
+
+  return render;
 };
